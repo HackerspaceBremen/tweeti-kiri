@@ -19,7 +19,13 @@ Following features are provided by this application:
 * Clear any configured authorization credentials
 
 ## Installation
+Before starting the installation, make sure you have **Python**, **pip** and **virtualenv** installed.
 
+1. Create a directory using **virtualenv** like so ```virtualenv tweeti-kiri``` and change into that directory.
+2. Activate the virtual environment by typing ```source bin/activate``` on the commandline
+3. Now copy the python file ```tweeti_kiri.py``` into the directory
+4. We need to install two python modules needed by the programm to run those are **'anyjson'** and **'python-twitter'** so please type after another ```pip install anyjson``` and ```pip install python-twitter```.
+5. Now you are basically set to use the program running ```python tweeti_kiri.py``` from the command line. **BUT** you need to do some configuration now with your twitter account which is described in the ```tweeti_kiri.py``` file. Just follow those instructions and have fun!
 
 ## Versions
 
