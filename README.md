@@ -2,7 +2,7 @@
 Your Social Media Vacuum Cleaner. Python application to help with housekeeping on Twitter.
 
 ## Screenshot
-![image](https://github.com/HackerspaceBremen/tweeti-kiri/screenshot_tweeti_kiri_v0_9.png/raw)
+![image](https://raw.githubusercontent.com/HackerspaceBremen/tweeti-kiri/master/screenshot_tweeti_kiri_v0_9.png)
 
 ## Features
 The program runs on the command line and provides an **interactive** way of requesting userinput to be setup and configured. Every action can be chosen individually and will only be executed after user confirmation.
