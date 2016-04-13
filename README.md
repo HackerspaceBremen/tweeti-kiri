@@ -24,8 +24,23 @@ Before starting the installation, make sure you have **Python**, **pip** and **v
 1. Create a directory using **virtualenv** like so ```virtualenv tweeti-kiri``` and change into that directory.
 2. Activate the virtual environment by typing ```source bin/activate``` on the commandline
 3. Now copy the python file ```tweeti_kiri.py``` into the directory
-4. We need to install two python modules needed by the programm to run those are **'anyjson'** and **'python-twitter'** so please type after another ```pip install anyjson``` and ```pip install python-twitter```.
+4. We need to install two python modules needed by the program to run those are **'anyjson'** and **'python-twitter'** so please type after another ```pip install anyjson``` and ```pip install python-twitter```.
 5. Now you are basically set to use the program running ```python tweeti_kiri.py``` from the command line. **BUT** you need to do some configuration now with your twitter account which is described in the ```tweeti_kiri.py``` file. Just follow those instructions and have fun!
+
+## Configuration
+After you installed the necessary Python modules to make the program work you need to create an App-authorization-entry in your twitter profile and afterwards configure the Python program with several credentials.
+
+Just follow this step by step description:
+
+1. To be able to remove all tweets from your account you first need to get your archive of tweets. You can do this by going to **Settings -> Account -> Your Twitter archive**.
+2. Go to [https://apps.twitter.com/](https://apps.twitter.com/) and create a new application. You can name the application e.g. **tweeti-kiri-$myTwitterNickname** because this name has to be unique worldwide. Be aware that for setting up this app you need to add a mobile phone number to your account before this will succeed. You can remove that number after the app was successfully created.
+3. Note down the **consumer key** and the **consumer secret** the new app provides to you.
+4. Authorize your app to access your own account and change permissions to also giv it access to direct messages. Then request the creation of the authorization **access key & secret** note them down, too.
+5. By this time Twitter should have mailed a link to you with your Twitter-archive as a **zip-file**. Give this file a meaningful name like e.g. **tweet_archive_$yourNick_2016** and copy it to the ```tweeti-kiri``` folder
+6. Now launch the program ```python tweeti_kiri.py``` from the command line and start with ACTION 1 to configure your account & credentials.
+7. You are now ready to do some housekeeping with your account.
+8. If you want to work with different twitter accounts, you need to repeat the procedure of configuration with each of these accounts. You can make a simple backup of the **configuration.cfg** which is created for each successful configuration if you want to keep that somewhere safe for later use.
+
 
 ## Versions
 
