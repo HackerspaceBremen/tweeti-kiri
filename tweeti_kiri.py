@@ -242,7 +242,7 @@ def configuration_write():
     print "CONFIG WRITE: Writing config %s ..." % CONFIG_FILE_PATH
     with open( CONFIG_FILE_PATH, 'w' ) as file_to_write:
         config_file.write( file_to_write )
-    print "CONFIG WRITE: Writing succeeded." % CONFIG_FILE_PATH
+    print "CONFIG WRITE: Writing succeeded."
 
 def configure_account():
     configure_print_status()
