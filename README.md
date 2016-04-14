@@ -50,6 +50,11 @@ Just follow this step by step description:
 
 Helpful hints for improving this piece of code can be transmitted to [trailblazr@noxymo.com](mailto:trailblazr@noxymo.com) or via Twitter to [@hspacehb](http://twitter.com/@hspacehb) the Twitter-Account of [Hackerspace Bremen](https://www.hackerspace-bremen.de/).
 
+## Kudos
+Many thanks go to [Mario Vilas](https://github.com/MarioVilas) for providing a really [useful piece of code](https://breakingcode.wordpress.com/2016/04/04/how-to-clean-up-your-twitter-account/) to start wrapping your head around. Thanks go also to the people maintaining the python-twitter module. Awesome piece of work without which this script won't be existing!
+
+I also thank all the beta testers of the code and all the visitors at the presentation at [Hackerspace Bremen](https://www.hackerspace-bremen.de) which posed some good questions during the [presentation (slides as PDF)](https://raw.githubusercontent.com/HackerspaceBremen/tweeti-kiri/master/tweeti_kiri_presentation_april_2016.pdf).
+
 ## License
 This code is licensed under the GPLv3 License.
 
