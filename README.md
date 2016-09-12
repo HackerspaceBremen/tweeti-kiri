@@ -28,7 +28,7 @@ $ sudo easy_install pip
 
 The next step is to install the virtualenv package:
 ```
-$ sudo pip install virtualenv
+$ sudo -H pip install virtualenv
 ```
 
 If everything is done you can proceed to the following steps:
