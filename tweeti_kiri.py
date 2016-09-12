@@ -19,11 +19,13 @@ import twitter
 
 # configuration storage & retrieval
 from ConfigParser import SafeConfigParser
+from datetime import date
 
 # APP CONSTANTS
 APP_PATH                    = os.path.dirname(os.path.abspath(__file__))
 APP_CONFIG_FILE             = 'configuration.cfg'
-APP_ESTIMATED_RATE_LIMIT    = 60 #seconds
+APP_ESTIMATED_RATE_LIMIT    = 10 # docu says 180 Requests per 15 min (900 seconds) window makes 5 seconds per operation (lets stay with 10 secs per op)
+APP_VERSION                 = 'v0.8 beta'
 
 # APP CONFIGURATION GLOBAL
 APP_CFG_CONSUMER_KEY        = None
@@ -88,13 +90,15 @@ def read_fake_json( zip, filename ):
 def tweets_extract_ids_from_zipfile( filename ):
     print "ZIPFILE, parsing now: %s" % filename
     tweet_ids = {}
+    tweet_counter = 0
     with zipfile.ZipFile(filename, 'r') as zip:
         tweet_index = read_fake_json( zip, 'data/js/tweet_index.js' )
         for item in tweet_index:
             tweets_this_month = read_fake_json( zip, item['file_name'] )
             assert len( tweets_this_month ) == item['tweet_count']
             tweet_ids[ "%d/%02d" % ( item['year'], item['month'] ) ] = [ x['id'] for x in tweets_this_month ]
-    return tweet_ids
+            tweet_counter = tweet_counter + int(item['tweet_count'])
+    return [tweet_ids, tweet_counter]
 
 def is_api_configured():
     if not configuration_is_valid():
@@ -346,7 +350,7 @@ def estimated_time_of_arrival( num_of_operations ):
     estimated_minutes = math.floor( estimated_seconds / 60 )
     estimated_seconds = estimated_seconds - ( estimated_minutes * 60 )
     estimated_hours = math.floor( estimated_minutes / 60 )
-    estimatd_minutes = estimated_minutes - ( estimated_hours * 60 )
+    estimated_minutes = estimated_minutes - ( estimated_hours * 60 )
     if estimated_hours > 0:
         if estimated_minutes > 0:
             eta_string = "%d hours and %d minutes" % ( estimated_hours, estimated_minutes )
@@ -426,6 +430,22 @@ def delete_directmessages():
     print "MESSAGES: DELETION COMPLETED."
     return
 
+def delete_tweets_choose_time_range( filename_archive ):
+    year_today = date.today().year
+    year_choice = "PLEASE CHOOSE YEAR UP TO WHICH WE DELETE TWEETS (ENTER for %s): " % str(year_today)
+    action_raw = raw_input( year_choice ).rstrip()
+    if not action_raw:
+        year_chosen = 2016
+    else:
+        year_chosen = int( action_raw )
+
+    continue_deleting = query_yes_no( "TWEETS: SELECT ALL TWEETS UNTIL AND INCLUDING YEAR %s ?" % str(year_chosen), default="no" )
+    if not continue_deleting:
+        print "TWEETS: Aborted deleting."
+        return
+    delete_tweets_from_archive_until_year( filename_archive, year_chosen )
+
+
 def delete_tweets_from_archive_until_year( filename_archive, tweets_year ):
     global APP_API
     FILE_PATH = APP_PATH+'/'+filename_archive
@@ -436,11 +456,14 @@ def delete_tweets_from_archive_until_year( filename_archive, tweets_year ):
     if not is_api_configured():
         return
     # get list of ids to destroy from zip file
-    tweet_ids = tweets_extract_ids_from_zipfile( filename_archive )
+    result_array = tweets_extract_ids_from_zipfile( filename_archive )
+    
+    tweet_ids = result_array[0]
+    num_to_delete = result_array[1]
+
     # sort in reversed order
     tweet_ids_sorted = sorted( tweet_ids.keys(), reverse=True )
 
-    num_to_delete = len( tweet_ids_sorted )
     print "TWEETS: There are %d tweets to delete." % num_to_delete
 
     estimated_time_needed = estimated_time_of_arrival( num_to_delete )
@@ -532,7 +555,8 @@ if __name__ == "__main__":
 
     print "(0) EXIT/ABORT"
     print ""
-    print "INFO: EVERY POTENTIALLY DESTRUCTIVE ACTION WILL ASK FOR CONFIRMATION AGAIN!"
+    print "VERSION: %s" % APP_VERSION
+    print "   INFO: EVERY POTENTIALLY DESTRUCTIVE ACTION WILL ASK FOR CONFIRMATION AGAIN!"
     print ""
 
     menu_choice = "PLEASE CHOOSE ITEM FROM MENU [0..%d]: " % num_menu_items
@@ -551,7 +575,7 @@ if __name__ == "__main__":
         analyze_account()
     elif action_chosen == 3:
         print "RETRIEVING TWEETS..."
-        delete_tweets_from_archive_until_year( APP_CFG_TWITTER_ARCHIVE, 2016 )
+        delete_tweets_choose_time_range( APP_CFG_TWITTER_ARCHIVE )
     elif action_chosen == 4:
         print "RETRIEVING DIRECT MESSAGES..."
         delete_directmessages()
