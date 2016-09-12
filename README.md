@@ -20,7 +20,7 @@ Following features are provided by this application:
 
 ## Installation
 Before starting the installation, make sure you have **Python**, `pip` and `virtualenv` installed.  
-On macOS **Python** should be installed by default and its setup tool `easy_install`, too. If you are missing `pip` and/or `virtualenv` its very straight forward to install it. First you should setup `pip`:
+On macOS **Python** should be installed by default and its setup tool `easy_install`, too. If you are missing `pip` and/or `virtualenv` it's very straight forward to install it. First you should setup `pip`:
 
 ```
 $ sudo easy_install pip
