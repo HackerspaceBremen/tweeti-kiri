@@ -19,7 +19,19 @@ Following features are provided by this application:
 * Clear any configured authorization credentials
 
 ## Installation
-Before starting the installation, make sure you have **Python**, **pip** and **virtualenv** installed.
+Before starting the installation, make sure you have **Python**, `pip` and `virtualenv` installed.  
+On macOS **Python** should be installed by default and its setup tool `easy_install`, too. If you are missing `pip` and/or `virtualenv` its very straight forward to install it. First you should setup `pip`:
+
+```
+$ sudo easy_install pip
+```
+
+The next step is to install the virtualenv package:
+```
+$ sudo pip install virtualenv
+```
+
+If everything is done you can proceed to the following steps:
 
 1. Create a directory using **virtualenv** like so ```virtualenv tweeti-kiri``` and change into that directory.
 2. Activate the virtual environment by typing ```source bin/activate``` on the commandline
