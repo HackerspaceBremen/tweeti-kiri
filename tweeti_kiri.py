@@ -25,7 +25,7 @@ from datetime import date
 APP_PATH                    = os.path.dirname(os.path.abspath(__file__))
 APP_CONFIG_FILE             = 'configuration.cfg'
 APP_ESTIMATED_RATE_LIMIT    = 10 # docu says 180 Requests per 15 min (900 seconds) window makes 5 seconds per operation (lets stay with 10 secs per op)
-APP_VERSION                 = 'v0.91'
+APP_VERSION                 = 'v0.92'
 
 # APP CONFIGURATION GLOBAL
 APP_CFG_CONSUMER_KEY        = None
@@ -87,7 +87,7 @@ def read_fake_json( zip, filename ):
     data = first_line + "\n" + data
     return anyjson.deserialize( data )
 
-def tweets_extract_ids_from_zipfile( filename ):
+def tweets_extract_ids_from_zipfile( filename, tweets_year, tweets_month ):
     print "ZIPFILE, parsing now: %s" % filename
     tweet_ids = {}
     tweet_counter = 0
@@ -96,8 +96,13 @@ def tweets_extract_ids_from_zipfile( filename ):
         for item in tweet_index:
             tweets_this_month = read_fake_json( zip, item['file_name'] )
             assert len( tweets_this_month ) == item['tweet_count']
-            tweet_ids[ "%d/%02d" % ( item['year'], item['month'] ) ] = [ x['id'] for x in tweets_this_month ]
-            tweet_counter = tweet_counter + int(item['tweet_count'])
+            if int(item['year']) < int(tweets_year):
+                tweet_ids[ "%d/%02d" % ( item['year'], item['month'] ) ] = [ x['id'] for x in tweets_this_month ]
+                tweet_counter = tweet_counter + int( item['tweet_count'] )
+            elif int( item['year'] ) == int( tweets_year ):
+                if int(item['month']) <= int(tweets_month):
+                    tweet_ids[ "%d/%02d" % ( item['year'], item['month'] ) ] = [ x['id'] for x in tweets_this_month ]
+                    tweet_counter = tweet_counter + int(item['tweet_count'])
     return [tweet_ids, tweet_counter]
 
 def is_api_configured():
@@ -153,6 +158,17 @@ def configuration_clear():
             print "CONFIG DELETE: Deleting config %s ..." % CONFIG_FILE_PATH
             os.remove( CONFIG_FILE_PATH )
             print "CONFIG DELETE: Deletion completed."
+
+def configuration_autobackup():
+    CONFIG_FILE_PATH = APP_PATH+'/'+APP_CONFIG_FILE
+    if APP_CFG_TWITTER_NICK and len( APP_CFG_TWITTER_NICK ) > 0:
+        CONFIG_FILE_PATH_BACKUP = APP_PATH+'/'+'backup'+'_'+APP_CFG_TWITTER_NICK+'_'+APP_CONFIG_FILE
+    else:
+        CONFIG_FILE_PATH_BACKUP = APP_PATH+'/'+'backup'+'_'+APP_CONFIG_FILE
+    if os.path.exists( CONFIG_FILE_PATH ):
+        print "CONFIG AUTOBACKUP: Autorenaming old config %s to %s ..." % ( CONFIG_FILE_PATH, CONFIG_FILE_PATH_BACKUP )
+        os.rename( CONFIG_FILE_PATH, CONFIG_FILE_PATH_BACKUP )
+        print "CONFIG AUTOBACKUP: Autorenaming completed."
 
 def configuration_read():
     global APP_API
@@ -229,6 +245,9 @@ def configuration_write():
     # WRITE FILE
     CONFIG_FILE_PATH = APP_PATH+'/'+APP_CONFIG_FILE
 
+    # BACKUP PREXISTING CONFIG
+    if os.path.exists( CONFIG_FILE_PATH ):
+        configuration_autobackup();
 
     config_file = SafeConfigParser()
     config_file.read( CONFIG_FILE_PATH )
@@ -439,14 +458,22 @@ def delete_tweets_choose_time_range( filename_archive ):
     else:
         year_chosen = int( action_raw )
 
-    continue_deleting = query_yes_no( "TWEETS: SELECT ALL TWEETS UNTIL AND INCLUDING YEAR %s ?" % str(year_chosen), default="no" )
+    month_today = date.today().month
+    month_choice = "PLEASE CHOOSE MONTH (1-12) UP TO WHICH WE DELETE TWEETS (ENTER for %s): " % str(month_today)
+    action_raw = raw_input( month_choice ).rstrip()
+    if not action_raw:
+        month_chosen = 12
+    else:
+        month_chosen = int( action_raw )
+
+    continue_deleting = query_yes_no( "TWEETS: SELECT ALL TWEETS UNTIL AND INCLUDING MONTH/YEAR %s/%s ?" % (str(month_chosen), str(year_chosen)), default="no" )
     if not continue_deleting:
         print "TWEETS: Aborted deleting."
         return
-    delete_tweets_from_archive_until_year( filename_archive, year_chosen )
+    delete_tweets_from_archive_until_year( filename_archive, year_chosen, month_chosen )
 
 
-def delete_tweets_from_archive_until_year( filename_archive, tweets_year ):
+def delete_tweets_from_archive_until_year( filename_archive, tweets_year, tweets_month ):
     global APP_API
     FILE_PATH = APP_PATH+'/'+filename_archive
     if not os.path.exists( FILE_PATH ):
@@ -456,7 +483,7 @@ def delete_tweets_from_archive_until_year( filename_archive, tweets_year ):
     if not is_api_configured():
         return
     # get list of ids to destroy from zip file
-    result_array = tweets_extract_ids_from_zipfile( filename_archive )
+    result_array = tweets_extract_ids_from_zipfile( filename_archive, tweets_year, tweets_month )
     
     tweet_ids = result_array[0]
     num_to_delete = result_array[1]

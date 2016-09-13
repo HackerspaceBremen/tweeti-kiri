@@ -85,6 +85,7 @@ from the command line and start with `ACTION 1` to configure your account & cred
 
 * Version 0.9 (12. April 2016)
 * Version 0.91 (13. September 2016)
+* Version 0.92 (13. September 2016)
 
 ## Contact
 
