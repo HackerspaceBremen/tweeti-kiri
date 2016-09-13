@@ -96,11 +96,11 @@ def tweets_extract_ids_from_zipfile( filename, tweets_year, tweets_month ):
         for item in tweet_index:
             tweets_this_month = read_fake_json( zip, item['file_name'] )
             assert len( tweets_this_month ) == item['tweet_count']
-            if int(item['year']) < int(tweets_year):
+            if int( item['year'] ) < int( tweets_year ):
                 tweet_ids[ "%d/%02d" % ( item['year'], item['month'] ) ] = [ x['id'] for x in tweets_this_month ]
                 tweet_counter = tweet_counter + int( item['tweet_count'] )
             elif int( item['year'] ) == int( tweets_year ):
-                if int(item['month']) <= int(tweets_month):
+                if int( item['month'] ) <= int( tweets_month ):
                     tweet_ids[ "%d/%02d" % ( item['year'], item['month'] ) ] = [ x['id'] for x in tweets_this_month ]
                     tweet_counter = tweet_counter + int(item['tweet_count'])
     return [tweet_ids, tweet_counter]
@@ -502,36 +502,37 @@ def delete_tweets_from_archive_until_year( filename_archive, tweets_year, tweets
         return
     
     begin = False
+    num_deleted = 0
     for date in tweet_ids_sorted:
-        year, month = date.split("/")
-        if int(year) < tweets_year:
-            print "TWEETS: Deleting from: %s" % date
-            num_to_delete = len( tweet_ids[date] )
-            num_deleted = 0
-            for tid in tweet_ids[date]:
-                if begin or last == 0 or tid == last:
-                    begin = True
-                    error_counter = 0
-                    while True:
+        year, month = date.split("/") # not really used
+        num_to_delete_month = len( tweet_ids[date] )
+        num_deleted_month = 0
+        print "TWEETS: Deleting %s tweets of: %s" % ( str( num_to_delete_month ), date )
+        for tid in tweet_ids[date]:
+            if begin or last == 0 or tid == last:
+                begin = True
+                error_counter = 0
+                while True:
+                    try:
+                        APP_API.DestroyStatus(tid)
+                        num_deleted += 1
+                        num_deleted_month += 1
+                        print "TWEETS: %d DELETED %d/%d of %d/%d (MONTH/TOTAL)" % ( tid, num_deleted_month,num_deleted, num_to_delete_month, num_to_delete )
+                        break
+                    except twitter.error.TwitterError, e:
                         try:
-                            APP_API.DestroyStatus(tid)
-                            num_deleted += 1
-                            print "TWEETS: %d DELETED (%d of %d)" % ( tid, num_deleted, num_to_delete )
-                            break
-                        except twitter.error.TwitterError, e:
-                            try:
-                                message = e.message[0]['message']
-                                retry = False
-                            except:
-                                message = repr( e.message )
-                                retry = True
-                            print "TWEETS: %d ERROR   %s" % (tid, message)
-                            error_counter += 1
-                            if error_counter > 5:
-                                print "TWEETS: Too many errors, aborting!"
-                                exit(1)
-                            if not retry:
-                                break # exit endless while loop
+                            message = e.message[0]['message']
+                            retry = False
+                        except:
+                            message = repr( e.message )
+                            retry = True
+                        print "TWEETS: %d ERROR   %s   %d/%d of %d/%d (MONTH/TOTAL)" % (tid, message, num_deleted_month,num_deleted, num_to_delete_month, num_to_delete)
+                        error_counter += 1
+                        if error_counter > 5:
+                            print "TWEETS: Too many errors, aborting!"
+                            exit(1)
+                        if not retry:
+                            break # exit endless while loop
     print "TWEETS: DELETION COMPLETED."
 
 
