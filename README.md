@@ -14,8 +14,8 @@ Following features are provided by this application:
 * Remove **all** tweets
 * Remove **all** direct messages
 * Remove **all** favourites
-* Remove **all** followers (not yet impletemted!)
-* Remove **all** friends/following (not yet impletemted!)
+* Remove **all** followers (not yet implemented!)
+* Remove **all** friends/following (not yet implemented!)
 * Clear any configured authorization credentials
 
 ## Installation

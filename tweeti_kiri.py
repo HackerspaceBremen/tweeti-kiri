@@ -399,8 +399,12 @@ def delete_favourites():
     except:
         print "FAVOURITES: Error determining amount of favourites."
         return
-    if num_to_delete == 0:
+    if num_to_delete_total == 0:
         print "FAVOURITES: No more favs to delete. Everything already cleaned."
+        return
+
+    if num_to_delete == 0 and num_to_delete_total > 0:
+        print "FAVOURITES: There are still %d favourites remaining, but twitter does not allow to delete those remaining favs." % num_to_delete_total
         return
 
     print "FAVOURITES: There are %d favourites in total to delete." % num_to_delete_total
