@@ -25,7 +25,7 @@ from datetime import date
 APP_PATH                    = os.path.dirname(os.path.abspath(__file__))
 APP_CONFIG_FILE             = 'configuration.cfg'
 APP_ESTIMATED_RATE_LIMIT    = 10 # docu says 180 Requests per 15 min (900 seconds) window makes 5 seconds per operation (lets stay with 10 secs per op)
-APP_VERSION                 = 'v0.92'
+APP_VERSION                 = 'v1.0'
 
 # APP CONFIGURATION GLOBAL
 APP_CFG_CONSUMER_KEY        = None
@@ -384,7 +384,74 @@ def estimated_time_of_arrival( num_of_operations ):
 
 def delete_favourites():
     global APP_API
-    print "FAVOURITES: Not yet implemented."
+    MAX_ALLOWED_FAVS = 200
+    favs_to_delete = None
+    screen_name = APP_CFG_TWITTER_NICK
+    try:
+        if not is_api_configured():
+            return
+        favs_to_delete = APP_API.GetFavorites( user_id=None, screen_name=None, count=MAX_ALLOWED_FAVS, since_id=None, max_id=None, include_entities=True )
+        num_to_delete = len( favs_to_delete )
+        num_deleted = 0
+        num_deleted_total = 0
+        account_owner = APP_API.GetUser( user_id=None, screen_name=screen_name, include_entities=True )
+        num_to_delete_total = account_owner.favourites_count
+    except:
+        print "FAVOURITES: Error determining amount of favourites."
+        return
+    if num_to_delete == 0:
+        print "FAVOURITES: No more favs to delete. Everything already cleaned."
+        return
+
+    print "FAVOURITES: There are %d favourites in total to delete." % num_to_delete_total
+
+    estimated_time_needed = estimated_time_of_arrival( num_to_delete )
+    print "FAVOURITES: Deletion of first batch of %d favs will take an estimated %s to finish." % (num_to_delete, estimated_time_needed)
+
+    continue_deleting = query_yes_no( "FAVOURITES: REALLY DELETE ALL FAVOURITES", default="no" )
+
+    if not continue_deleting:
+        print "FAVOURITES: Aborted deleting."
+        return
+
+    # start destroying favourites one by one
+    while num_to_delete > 0:
+
+        print "FAVOURITES: Deleting %d favourites now..." % num_to_delete
+        for current_fav in favs_to_delete:
+            error_counter = 0
+            while True:
+                try:
+                    APP_API.DestroyFavorite(status=None, id=current_fav.id, include_entities=True)
+                    num_deleted += 1
+                    num_deleted_total += 1
+                    print "FAVOURITES: %d DELETED (%d/%d of %d/%d)" % ( current_fav.id, num_deleted, num_deleted_total, num_to_delete, num_to_delete_total )
+                    break
+                except twitter.error.TwitterError, e:
+                    try:
+                        message = e.message[0]['message']
+                        retry = False
+                    except:
+                        message = repr( e.message )
+                        retry = True
+                    print "FAVOURITES: %d ERROR   %s" % (current_fav.id, message)
+                    error_counter += 1
+                    if error_counter > 5:
+                        print "FAVOURITES: Too many errors, aborting!"
+                        exit(1)
+                    if not retry:
+                        break # exit endless while loop
+        # fetch next batch of 200 favs until we get ZERO
+        favs_to_delete = APP_API.GetFavorites( user_id=None, screen_name=None, count=MAX_ALLOWED_FAVS, since_id=None, max_id=None, include_entities=True )
+        num_to_delete = len( favs_to_delete )
+        num_deleted = 0
+        account_owner = APP_API.GetUser( user_id=None, screen_name=screen_name, include_entities=True )
+        print "FAVOURITES: REMAINING FAVOURITES TO DELETE: %d" % account_owner.favourites_count
+        print "FAVOURITES: DELETING NEXT BATCH OF FAVOURITES WITH %d REMAINING." % num_to_delete
+
+    print "FAVOURITES: DELETION COMPLETED."
+    return
+
 
 def delete_followers():
     global APP_API
@@ -543,7 +610,7 @@ if __name__ == "__main__":
     print "***            TWEETI-KIRI             ***"
     print "***  YOUR SOCIAL MEDIA VACUUM CLEANER  ***"
     print "***                                    ***"
-    print "***       by trailblazr in 2016        ***"
+    print "***     by trailblazr, 2016 - 2017     ***"
     print "***  (derived from Mario Vilas' code)  ***"
     print "******************************************"
     print ""
@@ -572,7 +639,7 @@ if __name__ == "__main__":
     print "(2) Account analyze"
     print "(3) Remove tweets"
     print "(4) Remove direct messages"
-    print "(5) Remove favourites - Not yet implemented -"
+    print "(5) Remove favourites"
     print "(6) Remove followers - Not yet implemented -"
     print "(7) Remove friends/following - Not yet implemented -"
 

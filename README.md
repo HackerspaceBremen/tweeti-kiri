@@ -14,8 +14,8 @@ Following features are provided by this application:
 * Remove **all** tweets
 * Remove **all** direct messages
 * Remove **all** favourites
-* Remove **all** followers
-* Remove **all** friends/following
+* Remove **all** followers (not yet impletemted!)
+* Remove **all** friends/following (not yet impletemted!)
 * Clear any configured authorization credentials
 
 ## Installation
@@ -86,10 +86,11 @@ from the command line and start with `ACTION 1` to configure your account & cred
 * Version 0.9 (12. April 2016)
 * Version 0.91 (13. September 2016)
 * Version 0.92 (13. September 2016)
+* Version 1.0 (25. Mai 2017)
 
 ## Contact
 
-Helpful hints for improving this piece of code can be transmitted to [trailblazr@noxymo.com](mailto:trailblazr@noxymo.com) or via Twitter to [@hspacehb](http://twitter.com/@hspacehb) the Twitter-Account of [Hackerspace Bremen](https://www.hackerspace-bremen.de/).
+Helpful hints for improving this piece of code can be transmitted to [trailblazr@hackerspace-bremen.de](mailto:trailblazr@hackerspace-bremen.de) or via Twitter to [@hspacehb](http://twitter.com/@hspacehb) the Twitter-Account of [Hackerspace Bremen](https://www.hackerspace-bremen.de/).
 
 ## Kudos
 Many thanks go to [Mario Vilas](https://github.com/MarioVilas) for providing a really [useful piece of code](https://breakingcode.wordpress.com/2016/04/04/how-to-clean-up-your-twitter-account/) to start wrapping your head around. Thanks go also to the people maintaining the python-twitter module. Awesome piece of work without which this script won't be existing!
