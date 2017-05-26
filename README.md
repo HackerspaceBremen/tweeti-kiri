@@ -2,7 +2,7 @@
 Your Social Media Vacuum Cleaner. Python application to help with housekeeping on Twitter.
 
 ## Screenshot
-![image](https://raw.githubusercontent.com/HackerspaceBremen/tweeti-kiri/master/screenshot_tweeti_kiri_v0_9.png)
+![image](https://raw.githubusercontent.com/HackerspaceBremen/tweeti-kiri/master/screenshot_tweeti_kiri_v1_1.png)
 
 ## Features
 The program runs on the command line and provides an **interactive** way of requesting userinput to be setup and configured. Every action can be chosen individually and will only be executed after user confirmation.
@@ -14,6 +14,7 @@ Following features are provided by this application:
 * Remove **all** tweets
 * Remove **all** direct messages
 * Remove **all** favourites
+* Remove **all** retweets
 * Remove **all** followers (not yet implemented!)
 * Remove **all** friends/following (not yet implemented!)
 * Clear any configured authorization credentials
@@ -87,6 +88,7 @@ from the command line and start with `ACTION 1` to configure your account & cred
 * Version 0.91 (13. September 2016)
 * Version 0.92 (13. September 2016)
 * Version 1.0 (25. Mai 2017)
+* Version 1.1 (26. Mai 2017)
 
 ## Contact
 

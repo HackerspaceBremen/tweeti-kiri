@@ -25,7 +25,7 @@ from datetime import date
 APP_PATH                    = os.path.dirname(os.path.abspath(__file__))
 APP_CONFIG_FILE             = 'configuration.cfg'
 APP_ESTIMATED_RATE_LIMIT    = 10 # docu says 180 Requests per 15 min (900 seconds) window makes 5 seconds per operation (lets stay with 10 secs per op)
-APP_VERSION                 = 'v1.0'
+APP_VERSION                 = 'v1.1'
 
 # APP CONFIGURATION GLOBAL
 APP_CFG_CONSUMER_KEY        = None
@@ -456,6 +456,75 @@ def delete_favourites():
     print "FAVOURITES: DELETION COMPLETED."
     return
 
+def delete_retweets():
+    global APP_API
+    MAX_ALLOWED_RETS = 100
+    rets_to_delete = None
+    screen_name = APP_CFG_TWITTER_NICK
+    try:
+        if not is_api_configured():
+            return
+        rets_to_delete = APP_API.GetUserRetweets( count=None, since_id=None, max_id=None, trim_user=False)
+        num_to_delete = len( rets_to_delete )
+        num_deleted = 0
+        num_deleted_total = 0
+    except:
+        print "RETWEETS: Error determining amount of retweets."
+        return
+    if num_to_delete == 0:
+        print "RETWEETS: No more retweets to delete. Everything already cleaned."
+        return
+
+    print "RETWEETS: There are %d retweets in to delete." % num_to_delete
+
+    estimated_time_needed = estimated_time_of_arrival( num_to_delete )
+    print "RETWEETS: Deletion of first batch of %d retweets will take an estimated %s to finish." % (num_to_delete, estimated_time_needed)
+
+    continue_deleting = query_yes_no( "RETWEETS: REALLY DELETE ALL RETWEETS", default="no" )
+
+    if not continue_deleting:
+        print "RETWEETS: Aborted deleting."
+        return
+
+    # start destroying favourites one by one APP_API.DestroyStatus(tid)
+    while num_to_delete > 0:
+
+        print "RETWEETS: Deleting %d retweets now..." % num_to_delete
+        for current_ret in rets_to_delete:
+            #print "------------------------"
+            #print "RETWEET: id="+ str( current_ret.id ) + ", JSON="+current_ret.AsJsonString()
+            #print "------------------------"
+
+            error_counter = 0
+            should_delete = True
+            while should_delete:
+                try:
+                    APP_API.DestroyStatus( current_ret.id )
+                    num_deleted += 1
+                    print "RETWEETS: %d DELETED (%d of %d)" % ( current_ret.id, num_deleted, num_to_delete )
+                    break
+                except twitter.error.TwitterError, e:
+                    try:
+                        message = e.message[0]['message']
+                        retry = False
+                    except:
+                        message = repr( e.message )
+                        retry = True
+                    print "RETWEETS: %d ERROR   %s" % (current_ret.id, message)
+                    error_counter += 1
+                    if error_counter > 5:
+                        print "RETWEETS: Too many errors, aborting!"
+                        exit(1)
+                    if not retry:
+                        break # exit endless while loop
+        # fetch next batch of next 200 items until we reach ZERO remaining items
+        rets_to_delete = rets_to_delete = APP_API.GetUserRetweets( count=None, since_id=None, max_id=None, trim_user=False)
+        num_to_delete = len( rets_to_delete )
+        print "RETWEETS: REMAINING RETWEETS TO DELETE: %d" % num_to_delete
+        print "RETWEETS: DELETING NEXT BATCH OF RETWEETS WITH %d REMAINING." % num_to_delete
+
+    print "RETWEETS: DELETION COMPLETED."
+    return
 
 def delete_followers():
     global APP_API
@@ -635,7 +704,7 @@ if __name__ == "__main__":
     else:
         account_string = ""
 
-    num_menu_items = 7
+    num_menu_items = 8
     print ""
     print "MENU OF AVAILABLE ACTIONS"
     print ""
@@ -644,12 +713,13 @@ if __name__ == "__main__":
     print "(3) Remove tweets"
     print "(4) Remove direct messages"
     print "(5) Remove favourites"
-    print "(6) Remove followers - Not yet implemented -"
-    print "(7) Remove friends/following - Not yet implemented -"
+    print "(6) Remove tweets I retweeted"
+    print "(7) Remove followers - Not yet implemented -"
+    print "(8) Remove friends/following - Not yet implemented -"
 
     CONFIG_FILE_PATH = APP_PATH+'/'+APP_CONFIG_FILE
     if os.path.exists( CONFIG_FILE_PATH ):
-        print "(8) Remove configuration"
+        print "(9) Remove configuration"
         num_menu_items += 1
 
     print "(0) EXIT/ABORT"
@@ -682,12 +752,15 @@ if __name__ == "__main__":
         print "RETRIEVING FAVOURITES..."
         delete_favourites()
     elif action_chosen == 6:
+        print "RETRIEVING RETWEETS..."
+        delete_retweets()
+    elif action_chosen == 7:
         print "RETRIEVING FOLLOWERS..."
         delete_followers()
-    elif action_chosen == 7:
+    elif action_chosen == 8:
         print "RETRIEVING FRIENDS..."
         delete_friends()
-    elif action_chosen == 8 and num_menu_items >= 8:
+    elif action_chosen == 9 and num_menu_items >= 9:
         print "Cleaning CONFIG..."
         configuration_clear()
     elif action_chosen == 0:
