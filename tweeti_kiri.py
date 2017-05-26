@@ -675,98 +675,109 @@ def delete_tweets_from_archive_until_year( filename_archive, tweets_year, tweets
                             break # exit endless while loop
     print "TWEETS: DELETION COMPLETED."
 
+def clear_screen():
+    print ""
+    action_raw = raw_input( "ENTER to continue... " ).rstrip()
+    os.system('cls' if os.name == 'nt' else 'clear')
 
 # main app call
 if __name__ == "__main__":
-    print ""
-    print "******************************************"
-    print "***            TWEETI-KIRI             ***"
-    print "***  YOUR SOCIAL MEDIA VACUUM CLEANER  ***"
-    print "***                                    ***"
-    print "***     by trailblazr, 2016 - 2017     ***"
-    print "***  (derived from Mario Vilas' code)  ***"
-    print "******************************************"
-    print ""
-    configuration_read()
-    # configure_print_status()
-    if configuration_is_valid():
-        # Configure API with keys & secrets of app
-        APP_API = twitter.Api( 
-            consumer_key=APP_CFG_CONSUMER_KEY, 
-            consumer_secret=APP_CFG_CONSUMER_SECRET,
-            access_token_key=APP_CFG_ACCESS_TOKEN_KEY, 
-            access_token_secret=APP_CFG_ACCESS_TOKEN_SECRET, )
-    else:
-        APP_CFG_TWITTER_NICK = None
+    os.system('cls' if os.name == 'nt' else 'clear')
+    stay_alive = True
+    while stay_alive:
+        print ""
+        print "******************************************"
+        print "***            TWEETI-KIRI             ***"
+        print "***  YOUR SOCIAL MEDIA VACUUM CLEANER  ***"
+        print "***                                    ***"
+        print "***     by trailblazr, 2016 - 2017     ***"
+        print "***  (derived from Mario Vilas' code)  ***"
+        print "******************************************"
+        print ""
+        configuration_read()
+        # configure_print_status()
+        if configuration_is_valid():
+            # Configure API with keys & secrets of app
+            APP_API = twitter.Api( 
+                consumer_key=APP_CFG_CONSUMER_KEY, 
+                consumer_secret=APP_CFG_CONSUMER_SECRET,
+                access_token_key=APP_CFG_ACCESS_TOKEN_KEY, 
+                access_token_secret=APP_CFG_ACCESS_TOKEN_SECRET, )
+        else:
+            APP_CFG_TWITTER_NICK = None
 
-    if APP_CFG_TWITTER_NICK and len( APP_CFG_TWITTER_NICK ) > 0:
-        account_string =  " (Current: %s)" % APP_CFG_TWITTER_NICK
-    else:
-        account_string = ""
+        if APP_CFG_TWITTER_NICK and len( APP_CFG_TWITTER_NICK ) > 0:
+            account_string =  " (Current: %s)" % APP_CFG_TWITTER_NICK
+        else:
+            account_string = ""
 
-    num_menu_items = 8
-    print ""
-    print "MENU OF AVAILABLE ACTIONS"
-    print ""
-    print "(1) Account configure%s" % account_string
-    print "(2) Account analyze"
-    print "(3) Remove tweets"
-    print "(4) Remove direct messages"
-    print "(5) Remove favourites"
-    print "(6) Remove tweets I retweeted"
-    print "(7) Remove followers - Not yet implemented -"
-    print "(8) Remove friends/following - Not yet implemented -"
+        num_menu_items = 8
+        print ""
+        print "MENU OF AVAILABLE ACTIONS"
+        print ""
+        print "(1) Account configure%s" % account_string
+        print "(2) Account analyze"
+        print "(3) Remove tweets"
+        print "(4) Remove direct messages"
+        print "(5) Remove favourites"
+        print "(6) Remove (my) retweets"
+        print "(7) Remove followers - Not yet implemented -"
+        print "(8) Remove friends/following - Not yet implemented -"
 
-    CONFIG_FILE_PATH = APP_PATH+'/'+APP_CONFIG_FILE
-    if os.path.exists( CONFIG_FILE_PATH ):
-        print "(9) Remove configuration"
-        num_menu_items += 1
+        CONFIG_FILE_PATH = APP_PATH+'/'+APP_CONFIG_FILE
+        if os.path.exists( CONFIG_FILE_PATH ):
+            print "(9) Remove configuration"
+            num_menu_items += 1
 
-    print "(0) EXIT/ABORT"
-    print ""
-    print "VERSION: %s" % APP_VERSION
-    print "   INFO: EVERY POTENTIALLY DESTRUCTIVE ACTION WILL ASK FOR CONFIRMATION AGAIN!"
-    print ""
+        print "(0) EXIT/ABORT"
+        print ""
+        print "VERSION: %s" % APP_VERSION
+        print "   INFO: EVERY POTENTIALLY DESTRUCTIVE ACTION WILL ASK FOR CONFIRMATION AGAIN!"
+        print ""
+        print "WELCOME."
+        print ""
 
-    menu_choice = "PLEASE CHOOSE ITEM FROM MENU [0..%d]: " % num_menu_items
-    action_raw = raw_input( menu_choice ).rstrip()
-    if not action_raw:
-        action_chosen = 0
-    else:
-        action_chosen = int( action_raw )
-    print ""
-    print "WELCOME."
-    if action_chosen == 1:
-        print "CONFIGURING..."
-        configure_account()
-    elif action_chosen == 2:
-        print "ANALYZING..."
-        analyze_account()
-    elif action_chosen == 3:
-        print "RETRIEVING TWEETS..."
-        delete_tweets_choose_time_range( APP_CFG_TWITTER_ARCHIVE )
-    elif action_chosen == 4:
-        print "RETRIEVING DIRECT MESSAGES..."
-        delete_directmessages()
-    elif action_chosen == 5:
-        print "RETRIEVING FAVOURITES..."
-        delete_favourites()
-    elif action_chosen == 6:
-        print "RETRIEVING RETWEETS..."
-        delete_retweets()
-    elif action_chosen == 7:
-        print "RETRIEVING FOLLOWERS..."
-        delete_followers()
-    elif action_chosen == 8:
-        print "RETRIEVING FRIENDS..."
-        delete_friends()
-    elif action_chosen == 9 and num_menu_items >= 9:
-        print "Cleaning CONFIG..."
-        configuration_clear()
-    elif action_chosen == 0:
-        print "EXIT/ABORT..."
-    else:
-        print "ERROR: INVALID CHOICE/INPUT"
+        menu_choice = "PLEASE CHOOSE ITEM FROM MENU [0..%d]: " % num_menu_items
+        action_raw = raw_input( menu_choice ).rstrip()
+        if not action_raw:
+            action_chosen = 0
+        else:
+            action_chosen = int( action_raw )
+        if action_chosen == 1:
+            print "CONFIGURING..."
+            configure_account()
+        elif action_chosen == 2:
+            print "ANALYZING..."
+            analyze_account()
+        elif action_chosen == 3:
+            print "RETRIEVING TWEETS..."
+            delete_tweets_choose_time_range( APP_CFG_TWITTER_ARCHIVE )
+        elif action_chosen == 4:
+            print "RETRIEVING DIRECT MESSAGES..."
+            delete_directmessages()
+        elif action_chosen == 5:
+            print "RETRIEVING FAVOURITES..."
+            delete_favourites()
+        elif action_chosen == 6:
+            print "RETRIEVING RETWEETS..."
+            delete_retweets()
+        elif action_chosen == 7:
+            print "RETRIEVING FOLLOWERS..."
+            delete_followers()
+        elif action_chosen == 8:
+            print "RETRIEVING FRIENDS..."
+            delete_friends()
+        elif action_chosen == 9 and num_menu_items >= 9:
+            print "Cleaning CONFIG..."
+            configuration_clear()
+        elif action_chosen == 0:
+            print "EXIT/ABORT..."
+            stay_alive = False
+        else:
+            print "ERROR: INVALID CHOICE/INPUT"
+        if action_chosen != 0:
+            clear_screen()
+
 
     print "GOOD BYE!"
     print ""
