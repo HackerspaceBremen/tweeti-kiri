@@ -19,6 +19,17 @@ Following features are provided by this application:
 * Remove **all** friends/following (not yet implemented!)
 * Clear any configured authorization credentials
 
+## Last Release
+<span style="color:red;">**IMPORTENT:**</span> The most recent release needs to update the `python-twitter` module to the latest version `python-twitter (3.3)`. You can use *pip-review* to upgrade outdated modules. Just install it using `pip install pip-review` then type the following:
+
+```
+$ pip install pip-review
+```
+
+```
+$ pip-review --local --interactive
+```
+
 ## Installation
 Before starting the installation, make sure you have `python`, `pip` and `virtualenv` installed.  
 On macOS `python` should be installed by default and its setup tool `easy_install`, too. If you are missing `pip` and/or `virtualenv` it's very straight forward to install it. First you should setup `pip`:

@@ -426,7 +426,7 @@ def delete_favourites():
             error_counter = 0
             while True:
                 try:
-                    APP_API.DestroyFavorite(status=None, id=current_fav.id, include_entities=True)
+                    APP_API.DestroyFavorite(status=None, status_id=current_fav.id, include_entities=True)
                     num_deleted += 1
                     num_deleted_total += 1
                     print "FAVOURITES: %d DELETED (%d/%d of %d/%d)" % ( current_fav.id, num_deleted, num_deleted_total, num_to_delete, num_to_delete_total )
