@@ -18,14 +18,14 @@ import zipfile
 import twitter
 
 # configuration storage & retrieval
-from ConfigParser import SafeConfigParser
+from configparser import ConfigParser
 from datetime import date
 
 # APP CONSTANTS
 APP_PATH                    = os.path.dirname(os.path.abspath(__file__))
 APP_CONFIG_FILE             = 'configuration.cfg'
 APP_ESTIMATED_RATE_LIMIT    = 10 # docu says 180 Requests per 15 min (900 seconds) window makes 5 seconds per operation (lets stay with 10 secs per op)
-APP_VERSION                 = 'v1.1'
+APP_VERSION                 = 'v1.2 (for Python 3)'
 
 # APP CONFIGURATION GLOBAL
 APP_CFG_CONSUMER_KEY        = None
@@ -43,6 +43,16 @@ APP_DFT_ACCESS_TOKEN_SECRET = None # e.g. 'Wmqy5GFsaVBlny51ZkZwDwNDRrnDf4hRswk9C
 APP_DFT_TWITTER_NICK        = None # e.g. 'tagesschau'
 APP_DFT_TWITTER_ARCHIVE     = None # e.g. 'twitter_archiv_tagesschau_2016.zip'
 
+APP_LOGO = """
+_____                    __________      ______ _____       _____ 
+__  /___      _____________  /___(_)     ___  /____(_)_________(_)
+_  __/_ | /| / /  _ \  _ \  __/_  /________  //_/_  /__  ___/_  / 
+/ /_ __ |/ |/ //  __/  __/ /_ _  /_/_____/  ,<  _  / _  /   _  /  
+\__/ ____/|__/ \___/\___/\__/ /_/        /_/|_| /_/  /_/    /_/   """
+
+# see http://www.kammerl.de/ascii/AsciiSignature.php
+# http://patorjk.com/software/taag/#p=display&f=Doom&t=tweeti-kiri%20
+
 global APP_API
 APP_API = None
 
@@ -51,7 +61,7 @@ APP_API = None
 last = 0
 
 def query_yes_no( question, default="yes" ):
-    """Ask a yes/no question via raw_input() and return their answer.
+    """Ask a yes/no question via input() and return their answer.
 
     "question" is a string that is presented to the user.
     "default" is the presumed answer if the user just hits <Enter>.
@@ -72,7 +82,7 @@ def query_yes_no( question, default="yes" ):
 
     while True:
         sys.stdout.write( question + prompt )
-        choice = raw_input().lower()
+        choice = input().lower()
         if default is not None and choice == '':
             return valid[default]
         elif choice in valid:
@@ -81,14 +91,17 @@ def query_yes_no( question, default="yes" ):
             sys.stdout.write( "Please respond with 'yes' or 'no' (or 'y' or 'n').\n" )
 
 def read_fake_json( zip, filename ):
-    data = zip.open( filename, 'rU' ).read()
-    first_line, data = data.split( "\n", 1 )
-    first_line = first_line.split( "=", 1 )[1]
-    data = first_line + "\n" + data
+    data = zip.open( filename, 'r' ).read()
+    # print( "DATA 1: {}".format( data ) )
+    data = data.decode("utf-8")
+    first_line, data = data.split( '\n', 1 )
+    first_line = first_line.split( '=', 1 )[1]
+    data = first_line + '\n' + data
+    # print( "DATA 2: {}".format( data ) )
     return anyjson.deserialize( data )
 
 def tweets_extract_ids_from_zipfile( filename, tweets_year, tweets_month ):
-    print "ZIPFILE, parsing now: %s" % filename
+    print( "ZIPFILE, parsing now: {}".format( filename ) )
     tweet_ids = {}
     tweet_counter = 0
     with zipfile.ZipFile(filename, 'r') as zip:
@@ -107,9 +120,9 @@ def tweets_extract_ids_from_zipfile( filename, tweets_year, tweets_month ):
 
 def is_api_configured():
     if not configuration_is_valid():
-        print "API: No api-authorization configured, yet."
-        print "API: Please configure account/authorization first before trying to use this script."
-        print ""
+        print( "API: No api-authorization configured, yet." )
+        print( "API: Please configure account/authorization first before trying to use this script." )
+        print( "" )
         return False
     return True
 
@@ -121,15 +134,15 @@ def configure_print_status():
     global APP_CFG_ACCESS_TOKEN_KEY
     global APP_CFG_ACCESS_TOKEN_SECRET
 
-    print "CURRENT CONFIGURATION:"
-    print "----------------------"
-    print "            TWITTER NICK: %s" % APP_CFG_TWITTER_NICK
-    print "         TWITTER ARCHIVE: %s" % APP_CFG_TWITTER_ARCHIVE
-    print "       AUTH CONSUMER KEY: %s" % APP_CFG_CONSUMER_KEY
-    print "    AUTH CONSUMER SECRET: %s" % APP_CFG_CONSUMER_SECRET
-    print "   AUTH ACCESS TOKEN KEY: %s" % APP_CFG_ACCESS_TOKEN_KEY
-    print "AUTH ACCESS TOKEN SECRET: %s" % APP_CFG_ACCESS_TOKEN_SECRET
-    print "----------------------"
+    print( "CURRENT CONFIGURATION:" )
+    print( "----------------------" )
+    print( "            TWITTER NICK: {}".format( APP_CFG_TWITTER_NICK ) )
+    print( "         TWITTER ARCHIVE: {}".format( APP_CFG_TWITTER_ARCHIVE ) )
+    print( "       AUTH CONSUMER KEY: {}".format( APP_CFG_CONSUMER_KEY ) )
+    print( "    AUTH CONSUMER SECRET: {}".format( APP_CFG_CONSUMER_SECRET ) )
+    print( "   AUTH ACCESS TOKEN KEY: {}".format( APP_CFG_ACCESS_TOKEN_KEY ) )
+    print( "AUTH ACCESS TOKEN SECRET: {}".format( APP_CFG_ACCESS_TOKEN_SECRET ) )
+    print( "----------------------" )
 
 def configuration_is_valid():
     global APP_CFG_TWITTER_NICK
@@ -155,9 +168,9 @@ def configuration_clear():
     if os.path.exists( CONFIG_FILE_PATH ):
         continue_deleting = query_yes_no( "CONFIG DELETE: REALLY CLEAR CONFIG FOR ACCOUNT/AUTHORIZATION?", default="no" )
         if continue_deleting:
-            print "CONFIG DELETE: Deleting config %s ..." % CONFIG_FILE_PATH
+            print( "CONFIG DELETE: Deleting config {} ...".format( CONFIG_FILE_PATH ) )
             os.remove( CONFIG_FILE_PATH )
-            print "CONFIG DELETE: Deletion completed."
+            print( "CONFIG DELETE: Deletion completed." )
 
 def configuration_autobackup():
     CONFIG_FILE_PATH = APP_PATH+'/'+APP_CONFIG_FILE
@@ -166,9 +179,9 @@ def configuration_autobackup():
     else:
         CONFIG_FILE_PATH_BACKUP = APP_PATH+'/'+'backup'+'_'+APP_CONFIG_FILE
     if os.path.exists( CONFIG_FILE_PATH ):
-        print "CONFIG AUTOBACKUP: Autorenaming old config %s to %s ..." % ( CONFIG_FILE_PATH, CONFIG_FILE_PATH_BACKUP )
+        print( "CONFIG AUTOBACKUP: Autorenaming old config {} to {} ..." .format( CONFIG_FILE_PATH, CONFIG_FILE_PATH_BACKUP ) )
         os.rename( CONFIG_FILE_PATH, CONFIG_FILE_PATH_BACKUP )
-        print "CONFIG AUTOBACKUP: Autorenaming completed."
+        print( "CONFIG AUTOBACKUP: Autorenaming completed." )
 
 def configuration_read():
     global APP_API
@@ -190,7 +203,7 @@ def configuration_read():
     # CHECK EXISTENCE
     CONFIG_FILE_PATH = APP_PATH+'/'+APP_CONFIG_FILE
     if not os.path.exists( CONFIG_FILE_PATH ):
-        print "CONFIG READ: No config %s found. Configuring default values." % CONFIG_FILE_PATH
+        print( "CONFIG READ: No config {} found. Configuring default values." .format( CONFIG_FILE_PATH ) )
         # APPLY DEFAULT VALUES FROM GLOBAL CONSTANTS
         APP_CFG_TWITTER_NICK        = APP_DFT_TWITTER_NICK
         APP_CFG_TWITTER_ARCHIVE     = APP_DFT_TWITTER_ARCHIVE
@@ -203,14 +216,14 @@ def configuration_read():
             configuration_write()
         return
     else:
-        print "CONFIG READ: %s" % CONFIG_FILE_PATH
+        print( "CONFIG READ: {}" .format( CONFIG_FILE_PATH ) )
 
     # READ FILE
-    config_file = SafeConfigParser()
+    config_file = ConfigParser()
     try:
         config_file.read( CONFIG_FILE_PATH )
     except:
-        print "CONFIG READ: Reading config %s failed. (WARNING: API unconfigured!)" % CONFIG_FILE_PATH
+        print( "CONFIG READ: Reading config {} failed. (WARNING: API unconfigured!)" .format( CONFIG_FILE_PATH ) )
         return
 
     APP_CFG_TWITTER_NICK        = config_file.get( 'account', 'nick' )
@@ -249,7 +262,7 @@ def configuration_write():
     if os.path.exists( CONFIG_FILE_PATH ):
         configuration_autobackup();
 
-    config_file = SafeConfigParser()
+    config_file = ConfigParser()
     config_file.read( CONFIG_FILE_PATH )
     # STORE account
     config_file.add_section( 'account' )
@@ -262,20 +275,20 @@ def configuration_write():
     config_file.set( 'authorization', 'access_token_key', APP_CFG_ACCESS_TOKEN_KEY )
     config_file.set( 'authorization', 'access_token_secret', APP_CFG_ACCESS_TOKEN_SECRET )
 
-    print "CONFIG WRITE: Writing config %s ..." % CONFIG_FILE_PATH
+    print( "CONFIG WRITE: Writing config {} ..." .format( CONFIG_FILE_PATH ) )
     with open( CONFIG_FILE_PATH, 'w' ) as file_to_write:
         config_file.write( file_to_write )
-    print "CONFIG WRITE: Writing succeeded."
+    print( "CONFIG WRITE: Writing succeeded." )
 
 def configure_account():
     configure_print_status()
-    print ""
+    print( "" )
     continue_configuring = True
     if configuration_is_valid():
         continue_configuring = query_yes_no( "CONFIG: REALLY RECONFIGURE ACCOUNT/AUTHORIZATION?", default="no" )
 
     if not continue_configuring:
-        print "CONFIG: Aborted configuration."
+        print( "CONFIG: Aborted configuration." )
         return
     # NOW ASK DETAILS FROM USER
     global APP_CFG_TWITTER_NICK
@@ -285,27 +298,27 @@ def configure_account():
     global APP_CFG_ACCESS_TOKEN_KEY
     global APP_CFG_ACCESS_TOKEN_SECRET
 
-    APP_CFG_TWITTER_NICK        = raw_input( "        ENTER TWITTER NICK NAME: " ).rstrip()
-    APP_CFG_TWITTER_ARCHIVE     = raw_input( "ENTER PATH TO TWEET-ZIP-ARCHIVE: " ).rstrip()
-    APP_CFG_CONSUMER_KEY        = raw_input( "             ENTER CONSUMER KEY: " ).rstrip()
-    APP_CFG_CONSUMER_SECRET     = raw_input( "          ENTER CONSUMER SECRET: " ).rstrip()
-    APP_CFG_ACCESS_TOKEN_KEY    = raw_input( "         ENTER ACCESS TOKEN KEY: " ).rstrip()
-    APP_CFG_ACCESS_TOKEN_SECRET = raw_input( "      ENTER ACCESS TOKEN SECRET: " ).rstrip()
+    APP_CFG_TWITTER_NICK        = input( "        ENTER TWITTER NICK NAME: " ).rstrip()
+    APP_CFG_TWITTER_ARCHIVE     = input( "ENTER PATH TO TWEET-ZIP-ARCHIVE: " ).rstrip()
+    APP_CFG_CONSUMER_KEY        = input( "             ENTER CONSUMER KEY: " ).rstrip()
+    APP_CFG_CONSUMER_SECRET     = input( "          ENTER CONSUMER SECRET: " ).rstrip()
+    APP_CFG_ACCESS_TOKEN_KEY    = input( "         ENTER ACCESS TOKEN KEY: " ).rstrip()
+    APP_CFG_ACCESS_TOKEN_SECRET = input( "      ENTER ACCESS TOKEN SECRET: " ).rstrip()
 
-    print ""
+    print( "" )
     if configuration_is_valid():
         configuration_write()
-        print "CONFIG: Succeeded. Restart script now!"
+        print( "CONFIG: Succeeded. Restart script now!" )
     else:
-        print "CONFIG: Entered data is invalid. Something is missing... have a close look..."
-        print ""
+        print( "CONFIG: Entered data is invalid. Something is missing... have a close look..." )
+        print( "" )
         configure_print_status()
-    print ""
+    print( "" )
 
 
 def analyze_account():
     global APP_API
-    print ""
+    print( "" )
     screen_name = None
     if configuration_is_valid():
         choice_string = "ACCOUNT: ANALYZE CONFIGURED ACCOUNT (Current: %s)?" % APP_CFG_TWITTER_NICK
@@ -313,23 +326,23 @@ def analyze_account():
         if continue_using_default_account:
             screen_name = APP_CFG_TWITTER_NICK
         else:
-            screen_name = raw_input( "ENTER TWITTER NICK NAME TO ANALYZE: " )
+            screen_name = input( "ENTER TWITTER NICK NAME TO ANALYZE: " )
             screen_name = screen_name.rstrip()
     else:
-        screen_name = raw_input( "ENTER TWITTER NICK NAME TO ANALYZE: " )
+        screen_name = input( "ENTER TWITTER NICK NAME TO ANALYZE: " )
         screen_name = screen_name.rstrip()
 
-    print ""
+    print( "" )
     if not screen_name or len( screen_name ) < 2:
-        print "ACCOUNT: No valid account twitter nick entered. Aborting."
+        print( "ACCOUNT: No valid account twitter nick entered. Aborting." )
         return
 
     MAX_ALLOWED_MESSAGES = 200
     MAX_ALLOWED_FAVS = 200
     MAX_ALLOWED_FOLLOWERS = 2000
     try:
-        print "ACCOUNT: ACQUIRING DATA... PLEASE WAIT..."
-        print ""
+        print( "ACCOUNT: ACQUIRING DATA... PLEASE WAIT..." )
+        print( "" )
         if not is_api_configured():
             return
         account_owner = APP_API.GetUser( user_id=None, screen_name=screen_name, include_entities=True )
@@ -339,28 +352,28 @@ def analyze_account():
         #account_followers = api.GetFollowerIDs( user_id=None, screen_name=None, cursor=-1, stringify_ids=False, count=None, total_count=None )
         #account_following = api.GetFriendIDs( user_id=None, screen_name=None, cursor=-1, stringify_ids=False, count=None )
         #account_sent_direct_messages = api.GetSentDirectMessages( since_id=None, max_id=None, count=None, page=None, include_entities=True )
-    except twitter.error.TwitterError, e:
+    except twitter.error.TwitterError as e:
         try:
             message = e.message[0]['message']
         except:
             message = repr( e.message )
-        print "ACCOUNT: Error acquiring account data."
-        print "ACCOUNT: ERROR   %s" % (message,)
+        print( "ACCOUNT: Error acquiring account data." )
+        print( "ACCOUNT: ERROR   {}" .format( message ) )
         return
 
     # list data
-    print "----------------------"
-    print "       NAME: %s" % account_owner.name
-    print " SCREENNAME: %s" % account_owner.screen_name
-    print "  PROTECTED: %s" % account_owner.protected
-    print " USER SINCE: %s" % account_owner.created_at
-    print "DESCRIPTION: \n\n%s\n" % account_owner.description
-    print "----------------------"
-    print "     TWEETS: %s" % str( account_owner.statuses_count )
-    print "  FOLLOWERS: %s" % str( account_owner.followers_count )
-    print "  FOLLOWING: %s" % str( account_owner.friends_count )
-    print " FAVOURITES: %s" % str( account_owner.favourites_count )
-    print "----------------------"
+    print( "----------------------" )
+    print( "       NAME: {}" .format( account_owner.name ) )
+    print( " SCREENNAME: {}" .format( account_owner.screen_name ) )
+    print( "  PROTECTED: {}" .format( account_owner.protected ) )
+    print( " USER SINCE: {}" .format( account_owner.created_at ) )
+    print( "DESCRIPTION: \n\n{}\n" .format( account_owner.description ) )
+    print( "----------------------" )
+    print( "     TWEETS: {}" .format( str( account_owner.statuses_count ) ) )
+    print( "  FOLLOWERS: {}" .format( str( account_owner.followers_count ) ) )
+    print( "  FOLLOWING: {}" .format( str( account_owner.friends_count ) ) )
+    print( " FAVOURITES: {}" .format( str( account_owner.favourites_count ) ) )
+    print( "----------------------" )
     return
 
 def estimated_time_of_arrival( num_of_operations ):
@@ -397,31 +410,31 @@ def delete_favourites():
         account_owner = APP_API.GetUser( user_id=None, screen_name=screen_name, include_entities=True )
         num_to_delete_total = account_owner.favourites_count
     except:
-        print "FAVOURITES: Error determining amount of favourites."
+        print( "FAVOURITES: Error determining amount of favourites." )
         return
     if num_to_delete_total == 0:
-        print "FAVOURITES: No more favs to delete. Everything already cleaned."
+        print( "FAVOURITES: No more favs to delete. Everything already cleaned." )
         return
 
     if num_to_delete == 0 and num_to_delete_total > 0:
-        print "FAVOURITES: There are still %d favourites remaining, but twitter does not allow to delete those remaining favs." % num_to_delete_total
+        print( "FAVOURITES: There are still {} favourites remaining, but twitter does not allow to delete those remaining favs." .format( num_to_delete_total ) )
         return
 
-    print "FAVOURITES: There are %d favourites in total to delete." % num_to_delete_total
+    print( "FAVOURITES: There are {} favourites in total to delete." .format( num_to_delete_total ) )
 
     estimated_time_needed = estimated_time_of_arrival( num_to_delete )
-    print "FAVOURITES: Deletion of first batch of %d favs will take an estimated %s to finish." % (num_to_delete, estimated_time_needed)
+    print( "FAVOURITES: Deletion of first batch of {} favs will take an estimated () to finish." .format( num_to_delete, estimated_time_needed ) )
 
     continue_deleting = query_yes_no( "FAVOURITES: REALLY DELETE ALL FAVOURITES", default="no" )
 
     if not continue_deleting:
-        print "FAVOURITES: Aborted deleting."
+        print( "FAVOURITES: Aborted deleting." )
         return
 
     # start destroying favourites one by one
     while num_to_delete > 0:
 
-        print "FAVOURITES: Deleting %d favourites now..." % num_to_delete
+        print( "FAVOURITES: Deleting {} favourites now..." .format( num_to_delete ) )
         for current_fav in favs_to_delete:
             error_counter = 0
             while True:
@@ -429,19 +442,19 @@ def delete_favourites():
                     APP_API.DestroyFavorite(status=None, status_id=current_fav.id, include_entities=True)
                     num_deleted += 1
                     num_deleted_total += 1
-                    print "FAVOURITES: %d DELETED (%d/%d of %d/%d)" % ( current_fav.id, num_deleted, num_deleted_total, num_to_delete, num_to_delete_total )
+                    print( "FAVOURITES: {} DELETED ({}/{} of {}/{})" .format( current_fav.id, num_deleted, num_deleted_total, num_to_delete, num_to_delete_total ) )
                     break
-                except twitter.error.TwitterError, e:
+                except twitter.error.TwitterError as e:
                     try:
                         message = e.message[0]['message']
                         retry = False
                     except:
                         message = repr( e.message )
                         retry = True
-                    print "FAVOURITES: %d ERROR   %s" % (current_fav.id, message)
+                    print( "FAVOURITES: {} ERROR   {}" .format( current_fav.id, message ) )
                     error_counter += 1
                     if error_counter > 5:
-                        print "FAVOURITES: Too many errors, aborting!"
+                        print( "FAVOURITES: Too many errors, aborting!" )
                         exit(1)
                     if not retry:
                         break # exit endless while loop
@@ -450,10 +463,10 @@ def delete_favourites():
         num_to_delete = len( favs_to_delete )
         num_deleted = 0
         account_owner = APP_API.GetUser( user_id=None, screen_name=screen_name, include_entities=True )
-        print "FAVOURITES: REMAINING FAVOURITES TO DELETE: %d" % account_owner.favourites_count
-        print "FAVOURITES: DELETING NEXT BATCH OF FAVOURITES WITH %d REMAINING." % num_to_delete
+        print( "FAVOURITES: REMAINING FAVOURITES TO DELETE: {}" .format( account_owner.favourites_count ) )
+        print( "FAVOURITES: DELETING NEXT BATCH OF FAVOURITES WITH {} REMAINING." .format( num_to_delete ) )
 
-    print "FAVOURITES: DELETION COMPLETED."
+    print( "FAVOURITES: DELETION COMPLETED." )
     return
 
 def delete_retweets():
@@ -469,27 +482,27 @@ def delete_retweets():
         num_deleted = 0
         num_deleted_total = 0
     except:
-        print "RETWEETS: Error determining amount of retweets."
+        print( "RETWEETS: Error determining amount of retweets." )
         return
     if num_to_delete == 0:
-        print "RETWEETS: No more retweets to delete. Everything already cleaned."
+        print( "RETWEETS: No more retweets to delete. Everything already cleaned." )
         return
 
-    print "RETWEETS: There are %d retweets in to delete." % num_to_delete
+    print( "RETWEETS: There are {} retweets in to delete." .format( num_to_delete ) )
 
     estimated_time_needed = estimated_time_of_arrival( num_to_delete )
-    print "RETWEETS: Deletion of first batch of %d retweets will take an estimated %s to finish." % (num_to_delete, estimated_time_needed)
+    print( "RETWEETS: Deletion of first batch of {} retweets will take an estimated {} to finish." .format( num_to_delete, estimated_time_needed ) )
 
     continue_deleting = query_yes_no( "RETWEETS: REALLY DELETE ALL RETWEETS", default="no" )
 
     if not continue_deleting:
-        print "RETWEETS: Aborted deleting."
+        print( "RETWEETS: Aborted deleting." )
         return
 
     # start destroying favourites one by one APP_API.DestroyStatus(tid)
     while num_to_delete > 0:
 
-        print "RETWEETS: Deleting %d retweets now..." % num_to_delete
+        print( "RETWEETS: Deleting {} retweets now..." .format( num_to_delete ) )
         for current_ret in rets_to_delete:
             #print "------------------------"
             #print "RETWEET: id="+ str( current_ret.id ) + ", JSON="+current_ret.AsJsonString()
@@ -501,38 +514,38 @@ def delete_retweets():
                 try:
                     APP_API.DestroyStatus( current_ret.id )
                     num_deleted += 1
-                    print "RETWEETS: %d DELETED (%d of %d)" % ( current_ret.id, num_deleted, num_to_delete )
+                    print( "RETWEETS: {} DELETED ({} of {})" .format( current_ret.id, num_deleted, num_to_delete ) )
                     break
-                except twitter.error.TwitterError, e:
+                except twitter.error.TwitterError as e:
                     try:
                         message = e.message[0]['message']
                         retry = False
                     except:
                         message = repr( e.message )
                         retry = True
-                    print "RETWEETS: %d ERROR   %s" % (current_ret.id, message)
+                    print( "RETWEETS: {} ERROR   {}" .format( current_ret.id, message ) )
                     error_counter += 1
                     if error_counter > 5:
-                        print "RETWEETS: Too many errors, aborting!"
+                        print( "RETWEETS: Too many errors, aborting!" )
                         exit(1)
                     if not retry:
                         break # exit endless while loop
         # fetch next batch of next 200 items until we reach ZERO remaining items
         rets_to_delete = rets_to_delete = APP_API.GetUserRetweets( count=None, since_id=None, max_id=None, trim_user=False)
         num_to_delete = len( rets_to_delete )
-        print "RETWEETS: REMAINING RETWEETS TO DELETE: %d" % num_to_delete
-        print "RETWEETS: DELETING NEXT BATCH OF RETWEETS WITH %d REMAINING." % num_to_delete
+        print( "RETWEETS: REMAINING RETWEETS TO DELETE: {}" .format( num_to_delete ) )
+        print( "RETWEETS: DELETING NEXT BATCH OF RETWEETS WITH {} REMAINING." .format( num_to_delete ) )
 
-    print "RETWEETS: DELETION COMPLETED."
+    print( "RETWEETS: DELETION COMPLETED." )
     return
 
 def delete_followers():
     global APP_API
-    print "FOLLOWERS: Not yet implemented."
+    print( "FOLLOWERS: Not yet implemented." )
 
 def delete_friends():
     global APP_API
-    print "FRIENDS: Not yet implemented."
+    print( "FRIENDS: Not yet implemented." )
 
 def delete_directmessages():
     global APP_API
@@ -545,83 +558,87 @@ def delete_directmessages():
         num_to_delete = len( messages_to_delete )
         num_deleted = 0
     except:
-        print "MESSAGES: Error determining amount of direct messages."
+        print( "MESSAGES: Error determining amount of direct messages." )
         return
     if num_to_delete == 0:
-        print "MESSAGES: No more messages to delete. Everything already cleaned."
+        print( "MESSAGES: No more messages to delete. Everything already cleaned." )
         return
 
-    print "MESSAGES: There are %d sent direct messages to delete." % num_to_delete
+    print( "MESSAGES: There are {} sent direct messages to delete." .format( num_to_delete ) )
 
     estimated_time_needed = estimated_time_of_arrival( num_to_delete )
-    print "MESSAGES: Deletion will take an estimated %s to finish." % estimated_time_needed
+    print( "MESSAGES: Deletion will take an estimated {} to finish." .format( estimated_time_needed ) )
 
     continue_deleting = query_yes_no( "MESSAGES: REALLY DELETE ALL DIRECT MESSAGES SENT", default="no" )
 
     if not continue_deleting:
-        print "MESSAGES: Aborted deleting."
+        print( "MESSAGES: Aborted deleting." )
         return
 
     # start destroying messages one by one
-    print "MESSAGES: Deleting %d direct messages now..." % num_to_delete
+    print( "MESSAGES: Deleting {} direct messages now..." .format( num_to_delete ) )
     for current_message in messages_to_delete:
         error_counter = 0
         while True:
             try:
-                api.DestroyDirectMessage( current_message.id, include_entities=True )
+                APP_API.DestroyDirectMessage( current_message.id, include_entities=True )
                 num_deleted += 1
-                print "MESSAGES: %d DELETED (%d of %d) TO %s" % ( current_message.id, num_deleted, num_to_delete, current_message.recipient_screen_name )
+                print( "MESSAGES: {} DELETED ({} of {}) TO {}" .format( current_message.id, num_deleted, num_to_delete, current_message.recipient_screen_name ) )
                 break
-            except twitter.error.TwitterError, e:
+            except twitter.error.TwitterError as e:
                 try:
                     message = e.message[0]['message']
                     retry = False
                 except:
                     message = repr( e.message )
                     retry = True
-                print "MESSAGES: %d ERROR   %s" % (current_message.id, message)
+                print( "MESSAGES: {} ERROR   {}" .format( current_message.id, message ) )
                 error_counter += 1
                 if error_counter > 5:
-                    print "MESSAGES: Too many errors, aborting!"
+                    print( "MESSAGES: Too many errors, aborting!" )
                     exit(1)
                 if not retry:
                     break # exit endless while loop
-    print "MESSAGES: DELETION COMPLETED."
+    print( "MESSAGES: DELETION COMPLETED." )
     return
 
 def delete_tweets_choose_time_range( filename_archive ):
     year_today = date.today().year
-    year_choice = "PLEASE CHOOSE YEAR UP TO WHICH WE DELETE TWEETS (ENTER for %s): " % str(year_today)
-    action_raw = raw_input( year_choice ).rstrip()
+    year_choice = "PLEASE CHOOSE YEAR UP TO WHICH WE DELETE TWEETS (ENTER for {}): ".format( year_today )
+    action_raw = input( year_choice ).rstrip()
     if not action_raw:
-        year_chosen = 2016
+        year_chosen = year_today
     else:
         year_chosen = int( action_raw )
 
     month_today = date.today().month
-    month_choice = "PLEASE CHOOSE MONTH (1-12) UP TO WHICH WE DELETE TWEETS (ENTER for %s): " % str(month_today)
-    action_raw = raw_input( month_choice ).rstrip()
+    month_choice = "PLEASE CHOOSE MONTH (1-12) UP TO WHICH WE DELETE TWEETS (ENTER for {}): ".format( month_today )
+    action_raw = input( month_choice ).rstrip()
     if not action_raw:
-        month_chosen = 12
+        month_chosen = month_today
     else:
         month_chosen = int( action_raw )
 
-    continue_deleting = query_yes_no( "TWEETS: SELECT ALL TWEETS UNTIL AND INCLUDING MONTH/YEAR %s/%s ?" % (str(month_chosen), str(year_chosen)), default="no" )
+    continue_deleting = query_yes_no( "TWEETS: SELECT ALL TWEETS UNTIL AND INCLUDING MONTH/YEAR {}/{} ?".format( month_chosen, year_chosen), default="no" )
     if not continue_deleting:
-        print "TWEETS: Aborted deleting."
+        print( "TWEETS: Aborted deleting." )
         return
     delete_tweets_from_archive_until_year( filename_archive, year_chosen, month_chosen )
 
 
 def delete_tweets_from_archive_until_year( filename_archive, tweets_year, tweets_month ):
     global APP_API
-    FILE_PATH = APP_PATH+'/'+filename_archive
-    if not os.path.exists( FILE_PATH ):
-        print 'TWEETS: Das twitter-Archiv in '+FILE_PATH+' ist nicht vorhanden.'
-        return
-
     if not is_api_configured():
         return
+
+    if filename_archive == None:
+        print( "TWEETS: No ZIP archive configured to work with." )
+        return
+    FILE_PATH = APP_PATH+'/'+filename_archive
+    if not os.path.exists( FILE_PATH ):
+        print( "TWEETS: The twitter archive in {} was not found." .format( FILE_PATH ) )
+        return
+
     # get list of ids to destroy from zip file
     result_array = tweets_extract_ids_from_zipfile( filename_archive, tweets_year, tweets_month )
     
@@ -631,14 +648,14 @@ def delete_tweets_from_archive_until_year( filename_archive, tweets_year, tweets
     # sort in reversed order
     tweet_ids_sorted = sorted( tweet_ids.keys(), reverse=True )
 
-    print "TWEETS: There are %d tweets to delete." % num_to_delete
+    print( "TWEETS: There are {} tweets to delete." .format( num_to_delete ) )
 
     estimated_time_needed = estimated_time_of_arrival( num_to_delete )
-    print "TWEETS: Deletion will take an estimated %s to finish." % estimated_time_needed
+    print( "TWEETS: Deletion will take an estimated {} to finish." .format( estimated_time_needed ) )
 
     continue_deleting = query_yes_no( "TWEETS: REALLY DELETE ALL TWEETS NOW?", default="no" )
     if not continue_deleting:
-        print "TWEETS: Aborted deleting."
+        print( "TWEETS: Aborted deleting." )
         return
     
     begin = False
@@ -647,37 +664,37 @@ def delete_tweets_from_archive_until_year( filename_archive, tweets_year, tweets
         year, month = date.split("/") # not really used
         num_to_delete_month = len( tweet_ids[date] )
         num_deleted_month = 0
-        print "TWEETS: Deleting %s tweets of: %s" % ( str( num_to_delete_month ), date )
+        print( "TWEETS: Deleting {} tweets of: {}" .format( num_to_delete_month, date ) )
         for tid in tweet_ids[date]:
             if begin or last == 0 or tid == last:
                 begin = True
                 error_counter = 0
                 while True:
+                    num_deleted += 1
+                    num_deleted_month += 1
                     try:
                         APP_API.DestroyStatus(tid)
-                        num_deleted += 1
-                        num_deleted_month += 1
-                        print "TWEETS: %d DELETED %d/%d of %d/%d (MONTH/TOTAL)" % ( tid, num_deleted_month,num_deleted, num_to_delete_month, num_to_delete )
+                        print( "TWEETS: {} DELETED {}/{} of {}/{} (MONTH/TOTAL)" .format( tid, num_deleted_month,num_deleted, num_to_delete_month, num_to_delete ) )
                         break
-                    except twitter.error.TwitterError, e:
+                    except twitter.error.TwitterError as e:
                         try:
                             message = e.message[0]['message']
                             retry = False
                         except:
                             message = repr( e.message )
                             retry = True
-                        print "TWEETS: %d ERROR   %s   %d/%d of %d/%d (MONTH/TOTAL)" % (tid, message, num_deleted_month,num_deleted, num_to_delete_month, num_to_delete)
+                        print( "TWEETS: {} ERROR   {}   {}/{} of {}/{} (MONTH/TOTAL)" .format( tid, message, num_deleted_month,num_deleted, num_to_delete_month, num_to_delete) )
                         error_counter += 1
                         if error_counter > 5:
-                            print "TWEETS: Too many errors, aborting!"
+                            print( "TWEETS: Too many errors, aborting!" )
                             exit(1)
                         if not retry:
                             break # exit endless while loop
-    print "TWEETS: DELETION COMPLETED."
+    print( "TWEETS: DELETION COMPLETED." )
 
 def clear_screen():
-    print ""
-    action_raw = raw_input( "ENTER to continue... " ).rstrip()
+    print( "" )
+    action_raw = input( "ENTER to continue... " ).rstrip()
     os.system('cls' if os.name == 'nt' else 'clear')
 
 # main app call
@@ -685,15 +702,16 @@ if __name__ == "__main__":
     os.system('cls' if os.name == 'nt' else 'clear')
     stay_alive = True
     while stay_alive:
-        print ""
-        print "******************************************"
-        print "***            TWEETI-KIRI             ***"
-        print "***  YOUR SOCIAL MEDIA VACUUM CLEANER  ***"
-        print "***                                    ***"
-        print "***     by trailblazr, 2016 - 2017     ***"
-        print "***  (derived from Mario Vilas' code)  ***"
-        print "******************************************"
-        print ""
+        print( "" )
+        print( "******************************************" )
+        print( "***            TWEETI-KIRI             ***" )
+        print( "***  YOUR SOCIAL MEDIA VACUUM CLEANER  ***" )
+        print( "***                                    ***" )
+        print( "***     by trailblazr, 2016 - 2019     ***" )
+        print( "***  (derived from Mario Vilas' code)  ***" )
+        print( "******************************************" )
+        print( APP_LOGO )
+        print( "" )
         configuration_read()
         # configure_print_status()
         if configuration_is_valid():
@@ -712,75 +730,75 @@ if __name__ == "__main__":
             account_string = ""
 
         num_menu_items = 8
-        print ""
-        print "MENU OF AVAILABLE ACTIONS"
-        print ""
-        print "(1) Account configure%s" % account_string
-        print "(2) Account analyze"
-        print "(3) Remove tweets"
-        print "(4) Remove direct messages"
-        print "(5) Remove favourites"
-        print "(6) Remove (my) retweets"
-        print "(7) Remove followers - Not yet implemented -"
-        print "(8) Remove friends/following - Not yet implemented -"
+        print( "" )
+        print( "MENU OF AVAILABLE ACTIONS" )
+        print( "" )
+        print( "(1) Account configure{}" .format( account_string ) )
+        print( "(2) Account analyze" )
+        print( "(3) Remove tweets" )
+        print( "(4) Remove direct messages" )
+        print( "(5) Remove favourites" )
+        print( "(6) Remove (my) retweets" )
+        print( "(7) Remove followers - Not yet implemented -" )
+        print( "(8) Remove friends/following - Not yet implemented -" )
 
         CONFIG_FILE_PATH = APP_PATH+'/'+APP_CONFIG_FILE
         if os.path.exists( CONFIG_FILE_PATH ):
-            print "(9) Remove configuration"
+            print( "(9) Remove configuration" )
             num_menu_items += 1
 
-        print "(0) EXIT/ABORT"
-        print ""
-        print "VERSION: %s" % APP_VERSION
-        print "   INFO: EVERY POTENTIALLY DESTRUCTIVE ACTION WILL ASK FOR CONFIRMATION AGAIN!"
-        print ""
-        print "WELCOME."
-        print ""
+        print( "(0) EXIT/ABORT" )
+        print( "" )
+        print( "VERSION: {}".format( APP_VERSION ) )
+        print( "   INFO: EVERY POTENTIALLY DESTRUCTIVE ACTION WILL ASK FOR CONFIRMATION AGAIN!" )
+        print( "" )
+        print( "WELCOME." )
+        print( "" )
 
-        menu_choice = "PLEASE CHOOSE ITEM FROM MENU [0..%d]: " % num_menu_items
-        action_raw = raw_input( menu_choice ).rstrip()
+        menu_choice = "PLEASE CHOOSE ITEM FROM MENU [0..{}]: ".format( num_menu_items )
+        action_raw = input( menu_choice ).rstrip()
         if not action_raw:
             action_chosen = 0
         else:
             action_chosen = int( action_raw )
         if action_chosen == 1:
-            print "CONFIGURING..."
+            print( "CONFIGURING..." )
             configure_account()
         elif action_chosen == 2:
-            print "ANALYZING..."
+            print( "ANALYZING..." )
             analyze_account()
         elif action_chosen == 3:
-            print "RETRIEVING TWEETS..."
+            print( "RETRIEVING TWEETS..." )
             delete_tweets_choose_time_range( APP_CFG_TWITTER_ARCHIVE )
         elif action_chosen == 4:
-            print "RETRIEVING DIRECT MESSAGES..."
+            print( "RETRIEVING DIRECT MESSAGES..." )
             delete_directmessages()
         elif action_chosen == 5:
-            print "RETRIEVING FAVOURITES..."
+            print( "RETRIEVING FAVOURITES..." )
             delete_favourites()
         elif action_chosen == 6:
-            print "RETRIEVING RETWEETS..."
+            print( "RETRIEVING RETWEETS..." )
             delete_retweets()
         elif action_chosen == 7:
-            print "RETRIEVING FOLLOWERS..."
+            print( "RETRIEVING FOLLOWERS..." )
             delete_followers()
         elif action_chosen == 8:
-            print "RETRIEVING FRIENDS..."
+            print( "RETRIEVING FRIENDS..." )
             delete_friends()
         elif action_chosen == 9 and num_menu_items >= 9:
-            print "Cleaning CONFIG..."
+            print( "Cleaning CONFIG..." )
             configuration_clear()
         elif action_chosen == 0:
-            print "EXIT/ABORT..."
+            print( "EXIT/ABORT..." )
             stay_alive = False
         else:
-            print "ERROR: INVALID CHOICE/INPUT"
+            print( "ERROR: INVALID CHOICE/INPUT" )
         if action_chosen != 0:
             clear_screen()
 
 
-    print "GOOD BYE!"
-    print ""
+    print( "GOOD BYE!" )
+    print( "" )
 
 """
 HINTS FOR INSTALLING AND MODIFYING THIS SCRIPT:
