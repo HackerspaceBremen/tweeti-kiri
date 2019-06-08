@@ -33,7 +33,7 @@ this creates a folder with the virtual environment.
 This will create the directory `~/tweeti-kiri/` under your home directory.
 
 If you want to create this environment on another place just name it: 
-`virtualenv ~/Developer/Python/tweeti-kiri`. This will setup your virtual environment on the given path. All missing directories are created automatically. **For this example we will use `~/tweeti-kiri/`**.
+`python3 -m venv ~/Developer/Python/tweeti-kiri`. This will setup your virtual environment on the given path. All missing directories are created automatically. **For this example we will use `~/tweeti-kiri/`**.
 
 
 ### 2. Activate your virtual environment
