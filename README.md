@@ -49,6 +49,7 @@ Now you have to copy the `tweeti_kiri.py` file from this repository into your ne
 
 ```
 $ cp $(WHAT_EVER_YOUR_FORK_PATH_IS)/tweeti_kiri.py .
+$ cp $(WHAT_EVER_YOUR_FORK_PATH_IS)/requirements.txt .
 ```
 
 For making `tweeti_kiri.py` to run as expected we need to install some additional Python modules which are found in the `requirements.txt` file. These modules will be installed in our activated virtual environment:  
@@ -61,6 +62,14 @@ $ pip install -r requirements.txt
 After you installed the necessary Python modules to make the program work you need to create an app-authorization-entry in your twitter profile and afterwards configure the Python program with several credentials.
 
 Please follow the description below in **Configure twitter App & API Keys**.
+
+### 5. Launch
+
+```
+$ python tweeti-kiri.py
+```
+
+You should see something similar to the screenshot above.
 
 ## Configure twitter App & API Keys
 
@@ -146,9 +155,9 @@ Please follow the description in **Configure twitter App & API Keys**.
 * Version 0.9 (12. April 2016)
 * Version 0.91 (13. September 2016)
 * Version 0.92 (13. September 2016)
-* Version 1.0 (25. Mai 2017)
-* Version 1.1 (26. Mai 2017)
-* Version 1.2 (8. Juni 2019)
+* Version 1.0 (25. May 2017)
+* Version 1.1 (26. May 2017)
+* Version 1.2 (8. June 2019)
 
 ## Contact
 
