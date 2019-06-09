@@ -64,7 +64,6 @@ After you installed the necessary Python modules to make the program work you ne
 Please follow the description below in **Configure twitter App & API Keys**.
 
 ### 5. Launch
-
 ```
 $ python tweeti-kiri.py
 ```
@@ -72,7 +71,6 @@ $ python tweeti-kiri.py
 You should see something similar to the screenshot above.
 
 ## Configure twitter App & API Keys
-
 Just follow this step by step description:
 
 1. To be able to remove **all** tweets from your account you first need to get **Your Twitter archive**. This is necessary since we use the included Tweet-IDs being able to remove **all** tweets! You can do this by going to your [Twitter Account Settings](https://twitter.com/settings/account) (Twitter → Top Right Avatar → Settings → Account (left navigation)). Below on that page you will find a button named **Request your archive**. Click it. Twitter will send you an email if the archive is ready for download.
@@ -115,7 +113,6 @@ $ pip-review --local --interactive
 
 
 ### 1. Create your virtual environment
-
 ```
 virtualenv tweeti-kiri
 ```
@@ -151,7 +148,6 @@ After you installed the necessary Python modules to make the program work you ne
 Please follow the description in **Configure twitter App & API Keys**.
 
 ## Versions
-
 * Version 0.9 (12. April 2016)
 * Version 0.91 (13. September 2016)
 * Version 0.92 (13. September 2016)
@@ -160,7 +156,6 @@ Please follow the description in **Configure twitter App & API Keys**.
 * Version 1.2 (8. June 2019)
 
 ## Contact
-
 Helpful hints for improving this piece of code can be transmitted to [trailblazr@hackerspace-bremen.de](mailto:trailblazr@hackerspace-bremen.de) or via Twitter to [@hspacehb](http://twitter.com/@hspacehb) the Twitter-Account of [Hackerspace Bremen](https://www.hackerspace-bremen.de/).
 
 ## Kudos
@@ -171,5 +166,7 @@ I also thank all the beta testers of the code and all the visitors at the presen
 ## License
 This code is licensed under the GPLv3 License.
 
+## Alternatives
+There do exist several other solutions to the problem of housekeeping with twitter accounts. One of the most convenient solutions I have seen recently is the tool [semipheral](https://github.com/micahflee/semiphemeral) which offers a convenient way to manage your tweets in a way that you can do cleanup but also keep the most valuable tweets (defined by a ruleset you configure).
 
-
+The special way tweeti-kiri operates on the twitter archives only, allows to also delete tweets which are way back in the past. If you have more than 3000 tweets you won't even be able to delete them via twitters' official website. Using the archive gives you a way to delete even 100.000 tweets back into the past.
