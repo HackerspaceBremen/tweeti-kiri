@@ -26,6 +26,7 @@ Ensure you have installed Python 3. (You could use `brew` to install Python 3 ju
 ### 1. Setup virtual environment
 
 ```
+$ cd $(WHAT_EVER_YOUR_FORK_PATH_IS)
 $ python3 -m venv tweeti-kiri
 ``` 
 this creates a folder with the virtual environment.
@@ -55,7 +56,11 @@ $ cp $(WHAT_EVER_YOUR_FORK_PATH_IS)/requirements.txt .
 For making `tweeti_kiri.py` to run as expected we need to install some additional Python modules which are found in the `requirements.txt` file. These modules will be installed in our activated virtual environment:  
 
 ```
-$ pip install -r requirements.txt
+# The setup process needs to be adjusted a little for todays Python setup
+
+$ python3 -m pip install --upgrade pip
+$ pip3 install "setuptools<58.0.0"
+$ pip3 install -r requirements.txt
 ```
 
 ### 4. Prepare for usage
@@ -65,7 +70,7 @@ Please follow the description below in **Configure twitter App & API Keys**.
 
 ### 5. Launch
 ```
-$ python tweeti-kiri.py
+$ python3 tweeti-kiri.py
 ```
 
 You should see something similar to the screenshot above.
@@ -76,11 +81,14 @@ Just follow this step by step description:
 1. To be able to remove **all** tweets from your account you first need to get **Your Twitter archive**. This is necessary since we use the included Tweet-IDs being able to remove **all** tweets! You can do this by going to your [Twitter Account Settings](https://twitter.com/settings/account) (Twitter → Top Right Avatar → Settings → Account (left navigation)). Below on that page you will find a button named **Request your archive**. Click it. Twitter will send you an email if the archive is ready for download.
 2. Now navigate to [https://apps.twitter.com/](https://apps.twitter.com/) and create a new application. You can name the application e.g. **tweeti-kiri-$myTwitterNickname** because this name has to be unique worldwide. Be aware that for setting up this application you need to add a mobile phone number to your account before this will succeed. You can remove that number after the app was successfully created.  
 If you haven't already done it, please [configure your mobile number here](https://twitter.com/settings/devices).
+3. When setting up the User authentication settings for your Twitter app, select "Read and write and Direct message" under _App Permissions_ and Web App, "Automated App or Bot" under _Type of App_. Under _App info_, the settings can be neglegted, but some are reqiured. Just enter any URL you'd like (e.g. https://delete-twitter.io/auth) for the "Callback URI / Redirect URL" and the base URL as "Website URL" (e.g. https://delete-twitter.io). Save the changes and copy the Client ID and Client Secret.
+3. In the _Keys and Tokens_ section of your app, under _Authentication Tokens_, select "Generate" in the _Access Token and Secret_ section, and copy the "Access Token" and "Access Token Secret". These are the values needed for the tweeti-kiri config.
 3. Note down the **consumer key** and the **consumer secret** the new app provides to you.
 4. Authorize your app to access your own account and change permissions to also give it access to direct messages. Then request the creation of the **access token key & access token secret** and note them down, too.
 5. By this time Twitter should have mailed a link to you with your Twitter-archive as a **ZIP** file. Give this file a meaningful name like e.g. `tweet_archive_$yourNick_2016.zip` and copy it to your virtual environment `~/tweeti-kiri/` directory.
 6. Now, from within your virtual environment, you can launch the program by typing `python tweeti_kiri.py`
 from the command line and start with `ACTION 1` to configure your account & credentials.
+7. As _Consumer Key_ enter the API key from the Twitter app settings. _Consumer Secret_ should be the _API Key Secret_. _Access Token Key and Secret_ should also be copied from the app settings before.
 7. **DONE!** You are now ready to do some housekeeping with your account.
 8. If you want to work with different twitter accounts, you need to repeat the procedure of configuration with each of these accounts. You can make a simple backup of the **configuration.cfg** which is created for each successful configuration if you want to keep that somewhere safe for later use.
 
