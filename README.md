@@ -70,7 +70,7 @@ Please follow the description below in **Configure twitter App & API Keys**.
 
 ### 5. Launch
 ```
-$ python3 tweeti-kiri.py
+$ python3 tweeti_kiri.py
 ```
 
 You should see something similar to the screenshot above.
