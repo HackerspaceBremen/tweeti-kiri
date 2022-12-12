@@ -11,11 +11,12 @@ Thank you, have fun!
 """
 
 # needed for basic file I/O
-import sys, os, traceback, math
+import sys, os, traceback, math, re
 
 import anyjson
 import zipfile
 import twitter
+from datetime import datetime
 
 # configuration storage & retrieval
 from configparser import ConfigParser
@@ -100,22 +101,38 @@ def read_fake_json( zip, filename ):
     # print( "DATA 2: {}".format( data ) )
     return anyjson.deserialize( data )
 
+def collect_all_tweets(filename):
+    zip = zipfile.ZipFile(filename, 'r')
+    files = zip.namelist()
+    tweets_files = list(filter(lambda x: re.search("\/tweets.*\.js", x), files))
+
+    tweets = []
+    for tweets_file in tweets_files:
+        print("Collecting tweets from {}".format( tweets_file ))
+        tweets += read_fake_json( zip, tweets_file )
+    zip.close()
+    return tweets
+    
 def tweets_extract_ids_from_zipfile( filename, tweets_year, tweets_month ):
     print( "ZIPFILE, parsing now: {}".format( filename ) )
     tweet_ids = {}
     tweet_counter = 0
-    with zipfile.ZipFile(filename, 'r') as zip:
-        tweet_index = read_fake_json( zip, 'data/js/tweet_index.js' )
-        for item in tweet_index:
-            tweets_this_month = read_fake_json( zip, item['file_name'] )
-            assert len( tweets_this_month ) == item['tweet_count']
-            if int( item['year'] ) < int( tweets_year ):
-                tweet_ids[ "%d/%02d" % ( item['year'], item['month'] ) ] = [ x['id'] for x in tweets_this_month ]
-                tweet_counter = tweet_counter + int( item['tweet_count'] )
-            elif int( item['year'] ) == int( tweets_year ):
-                if int( item['month'] ) <= int( tweets_month ):
-                    tweet_ids[ "%d/%02d" % ( item['year'], item['month'] ) ] = [ x['id'] for x in tweets_this_month ]
-                    tweet_counter = tweet_counter + int(item['tweet_count'])
+    tweets = collect_all_tweets(filename)
+    for object in tweets:
+        tweet = object['tweet']
+        tweet_date = datetime.strptime(tweet['created_at'], '%a %b %d %H:%M:%S %z %Y').date() # Thu Nov 03 13:21:02 +0000 2022
+        key = "%d/%02d" % ( tweet_date.year, tweet_date.month )
+        if tweet_date.year < int( tweets_year ):
+            if key not in tweet_ids:
+                tweet_ids[key] = []
+            tweet_ids[key].append(tweet["id"]) 
+            tweet_counter += 1
+        elif tweet_date.year == int( tweets_year ):
+            if tweet_date.month <= int( tweets_month ):
+                if key not in tweet_ids:
+                    tweet_ids[key] = []
+                tweet_ids[ key ].append(tweet["id"])
+                tweet_counter += 1
     return [tweet_ids, tweet_counter]
 
 def is_api_configured():
