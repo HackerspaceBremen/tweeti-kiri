@@ -118,7 +118,8 @@ def tweets_extract_ids_from_zipfile( filename, tweets_year, tweets_month ):
     tweet_ids = {}
     tweet_counter = 0
     tweets = collect_all_tweets(filename)
-    for tweet in tweets:
+    for object in tweets:
+        tweet = object['tweet']
         tweet_date = datetime.strptime(tweet['created_at'], '%a %b %d %H:%M:%S %z %Y').date() # Thu Nov 03 13:21:02 +0000 2022
         key = "%d/%02d" % ( tweet_date.year, tweet_date.month )
         if tweet_date.year < int( tweets_year ):
@@ -689,7 +690,7 @@ def delete_tweets_from_archive_until_year( filename_archive, tweets_year, tweets
                     num_deleted += 1
                     num_deleted_month += 1
                     try:
-                        #APP_API.DestroyStatus(tid)
+                        APP_API.DestroyStatus(tid)
                         print( "TWEETS: {} DELETED {}/{} of {}/{} (MONTH/TOTAL)" .format( tid, num_deleted_month,num_deleted, num_to_delete_month, num_to_delete ) )
                         break
                     except twitter.error.TwitterError as e:
